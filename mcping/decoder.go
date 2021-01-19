@@ -2,12 +2,13 @@ package mcping
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/iverly/go-mcping/api/types"
 	"github.com/jmoiron/jsonq"
 	"strings"
 )
 
-func decodeResponse(response string) *types.PingResponse  {
+func decodeResponse(response string) *types.PingResponse {
 	d := map[string]interface{}{}
 	dec := json.NewDecoder(strings.NewReader(response))
 	dec.Decode(&d)
@@ -15,6 +16,7 @@ func decodeResponse(response string) *types.PingResponse  {
 	presp := &types.PingResponse{}
 
 	presp.Sample = decodePlayersSimple(jq)
+
 	presp.Motd = decodeMotd(jq)
 
 	count := types.PlayerCount{}
@@ -42,6 +44,11 @@ func decodePlayersSimple(jq *jsonq.JsonQuery) []types.PlayerSample {
 }
 
 func decodeMotd(jq *jsonq.JsonQuery) string {
+	//针对官方服务端的motd
+	if obj_desc, err := jq.Object("description"); err == nil {
+		return fmt.Sprintf("%v", obj_desc["text"])
+	}
+
 	tm, err := jq.ArrayOfObjects("description", "extra")
 	if err == nil {
 		var sb strings.Builder

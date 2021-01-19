@@ -12,10 +12,16 @@ type resolver struct {
 // Create a new resolver with the DNS server of Cloudflare (1.1.1.1)
 // The DNS server can be changed by using resolver#SetInternalResolver
 func NewResolver() *resolver {
+	//默认改为阿里dns
+	return NewCustomResolver("223.5.5.5:53")
+}
+
+//增加自定义dns地址
+func NewCustomResolver(address string) *resolver {
 	return &resolver{
 		internalResolver: &net.Resolver{
 			Dial: func(ctx context.Context, network, address string) (net.Conn, error) {
-				return (&net.Dialer{}).DialContext(ctx, network, "1.1.1.1:53")
+				return (&net.Dialer{}).DialContext(ctx, network, address)
 			},
 		},
 	}
